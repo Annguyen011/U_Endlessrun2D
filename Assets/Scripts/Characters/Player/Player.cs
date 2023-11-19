@@ -3,10 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Animator))]
 public class Player : MonoBehaviour
 {
     [Header("# Move info")]
-    public bool runBegun;
+    public bool playerUnlock;
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpForce;
     private float inputX;
@@ -18,11 +19,13 @@ public class Player : MonoBehaviour
 
     #region Components
     private Rigidbody2D rb;
+    private Animator animator;
     #endregion
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
 
     private void Start()
@@ -33,15 +36,23 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        AnimatorController();
         CheckCollider();
 
-        if (runBegun)
+        if (playerUnlock)
         {
             inputX = Input.GetAxisRaw("Horizontal");
             rb.velocity = new Vector2(inputX * moveSpeed, rb.velocity.y);
         }
 
         CheckInput();
+    }
+
+    private void AnimatorController()
+    {
+        animator.SetFloat("yVelocity", rb.velocity.y);
+        animator.SetFloat("xVelocity", Mathf.Abs(rb.velocity.x));
+        animator.SetBool("isGrounded", isGrounded);
     }
 
     private void CheckCollider()
@@ -53,7 +64,7 @@ public class Player : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
-            runBegun = !runBegun;
+            playerUnlock = !playerUnlock;
         }
 
         if (Input.GetButtonDown("Jump") && isGrounded)
