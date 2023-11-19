@@ -13,8 +13,9 @@ public class Player : MonoBehaviour
     private float inputX;
 
     [Header("# Collider info")]
-    [SerializeField] private float checkDisctance;
     [SerializeField] private LayerMask whatisground;
+    [SerializeField] private Transform checkGround;
+    [SerializeField] private float checkDisctance;
     private bool isGrounded;
 
     #region Components
@@ -57,7 +58,7 @@ public class Player : MonoBehaviour
 
     private void CheckCollider()
     {
-        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, checkDisctance, whatisground);
+        isGrounded = Physics2D.OverlapCircle(checkGround.position, checkDisctance, whatisground);
     }
 
     private void CheckInput()
@@ -77,6 +78,6 @@ public class Player : MonoBehaviour
     {
 
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y - checkDisctance));
+        Gizmos.DrawWireSphere(checkGround.position, checkDisctance);
     }
 }
