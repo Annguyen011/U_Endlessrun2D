@@ -8,14 +8,26 @@ public class Player : MonoBehaviour
 {
     [Header("# Move info")]
     public bool playerUnlock;
+    public bool PlayerMoving => rb.velocity.x > 0;
     [SerializeField] private float moveSpeed;
     [SerializeField] private float jumpForce;
+    [SerializeField] private float doubleJumpForce;
+    private bool canDoubleJump;
     private float inputX;
+
+    [Header("Slide info")]
+    [SerializeField] private float slideSpeed;
+    [SerializeField] private float slideTimer;
+    private float slideTimeCounter;
+    private bool isSliding;
 
     [Header("# Collider info")]
     [SerializeField] private LayerMask whatisground;
     [SerializeField] private Transform checkGround;
+    [SerializeField] private Transform checkWall;
     [SerializeField] private float checkDisctance;
+    [SerializeField] private Vector2 wallCheckSize;
+    private bool wallDetected;
     private bool isGrounded;
 
     #region Components
@@ -40,37 +52,63 @@ public class Player : MonoBehaviour
         AnimatorController();
         CheckCollider();
 
-        if (playerUnlock)
+        if (playerUnlock && !wallDetected)
         {
-            inputX = Input.GetAxisRaw("Horizontal");
-            rb.velocity = new Vector2(inputX * moveSpeed, rb.velocity.y);
+            Movement();
         }
 
         CheckInput();
     }
+
 
     private void AnimatorController()
     {
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetFloat("xVelocity", Mathf.Abs(rb.velocity.x));
         animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isDoubleJump", canDoubleJump);
     }
 
     private void CheckCollider()
     {
         isGrounded = Physics2D.OverlapCircle(checkGround.position, checkDisctance, whatisground);
+        wallDetected = Physics2D.BoxCast(checkWall.position, wallCheckSize, 0, Vector2.zero, 0, whatisground);
     }
 
     private void CheckInput()
     {
+        inputX = Input.GetAxisRaw("Horizontal");
+
+        if (isGrounded)
+        {
+            canDoubleJump = true;
+        }
+
         if (Input.GetMouseButtonDown(1))
         {
             playerUnlock = !playerUnlock;
         }
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump"))
+        {
+            JumpButton();
+        }
+    }
+    private void Movement()
+    {
+        rb.velocity = new Vector2(inputX * moveSpeed, rb.velocity.y);
+    }
+
+    private void JumpButton()
+    {
+        if (isGrounded)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
+        else if (canDoubleJump)
+        {
+            canDoubleJump = false;
+            rb.velocity = new Vector2(rb.velocity.x, doubleJumpForce);
         }
     }
 
@@ -79,5 +117,6 @@ public class Player : MonoBehaviour
 
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(checkGround.position, checkDisctance);
+        Gizmos.DrawWireCube(checkWall.position, wallCheckSize);
     }
 }
