@@ -17,18 +17,25 @@ public class Player : MonoBehaviour
 
     [Header("Slide info")]
     [SerializeField] private float slideSpeed;
-    [SerializeField] private float slideTimer;
+    [SerializeField] private float slideTime;
+    [SerializeField] private float slideCooldown;
+    private float slideCooldownCounter;
     private float slideTimeCounter;
     private bool isSliding;
+
 
     [Header("# Collider info")]
     [SerializeField] private LayerMask whatisground;
     [SerializeField] private Transform checkGround;
     [SerializeField] private Transform checkWall;
     [SerializeField] private float checkDisctance;
+    [SerializeField] private float ceilingcheckDisctance;
     [SerializeField] private Vector2 wallCheckSize;
+    private bool ceilingDetected;
     private bool wallDetected;
     private bool isGrounded;
+
+
 
     #region Components
     private Rigidbody2D rb;
@@ -49,6 +56,9 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        slideTimeCounter -= Time.deltaTime;
+        slideCooldownCounter -= Time.deltaTime;
+
         AnimatorController();
         CheckCollider();
 
@@ -58,26 +68,43 @@ public class Player : MonoBehaviour
         }
 
         CheckInput();
+        CheckForSlide();
     }
 
+    private void CheckForSlide()
+    {
+        if (slideTimeCounter < 0 && !ceilingDetected)
+        {
+            isSliding = false;
+        }
+
+    }
 
     private void AnimatorController()
     {
         animator.SetFloat("yVelocity", rb.velocity.y);
         animator.SetFloat("xVelocity", Mathf.Abs(rb.velocity.x));
+
         animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isSliding", isSliding);
         animator.SetBool("isDoubleJump", canDoubleJump);
     }
 
     private void CheckCollider()
     {
         isGrounded = Physics2D.OverlapCircle(checkGround.position, checkDisctance, whatisground);
+        ceilingDetected = Physics2D.Raycast(transform.position, Vector2.up, ceilingcheckDisctance, whatisground);
         wallDetected = Physics2D.BoxCast(checkWall.position, wallCheckSize, 0, Vector2.zero, 0, whatisground);
     }
 
     private void CheckInput()
     {
         inputX = Input.GetAxisRaw("Horizontal");
+
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            SlideButton();
+        }
 
         if (isGrounded)
         {
@@ -94,13 +121,33 @@ public class Player : MonoBehaviour
             JumpButton();
         }
     }
+
+    private void SlideButton()
+    {
+        if (rb.velocity.x != 0 && slideCooldownCounter < 0)
+        {
+            isSliding = true;
+            slideTimeCounter = slideTime;
+            slideCooldownCounter = slideCooldown;
+        }
+    }
+
     private void Movement()
     {
-        rb.velocity = new Vector2(inputX * moveSpeed, rb.velocity.y);
+        if (wallDetected) return;
+
+        if (isSliding)
+        {
+            rb.velocity = new Vector2(slideSpeed, 0);
+        }
+        else
+            rb.velocity = new Vector2(inputX * moveSpeed, rb.velocity.y);
     }
 
     private void JumpButton()
     {
+        if (isSliding) return;
+
         if (isGrounded)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
@@ -116,6 +163,7 @@ public class Player : MonoBehaviour
     {
 
         Gizmos.color = Color.red;
+        Gizmos.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y + ceilingcheckDisctance));
         Gizmos.DrawWireSphere(checkGround.position, checkDisctance);
         Gizmos.DrawWireCube(checkWall.position, wallCheckSize);
     }

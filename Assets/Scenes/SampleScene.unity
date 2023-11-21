@@ -1487,12 +1487,16 @@ MonoBehaviour:
   moveSpeed: 5
   jumpForce: 15
   doubleJumpForce: 10
+  slideSpeed: 20
+  slideTime: 0.4
+  slideCooldown: 1
   whatisground:
     serializedVersion: 2
     m_Bits: 64
   checkGround: {fileID: 2112314111}
   checkWall: {fileID: 945786883}
   checkDisctance: 0.45
+  ceilingcheckDisctance: 1.1
   wallCheckSize: {x: 0.5, y: 2}
 --- !u!95 &96203272
 Animator:
