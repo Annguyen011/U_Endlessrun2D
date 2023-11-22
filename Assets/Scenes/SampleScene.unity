@@ -1468,6 +1468,7 @@ Transform:
   m_Children:
   - {fileID: 2112314111}
   - {fileID: 945786883}
+  - {fileID: 1170592791}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1483,6 +1484,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 799604e5112b9be48b5af18021b2f1c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSpeed: 20
+  speedMuitiple: 1.15
+  milestoneIncreaser: 50
   playerUnlock: 1
   moveSpeed: 5
   jumpForce: 15
@@ -1490,6 +1494,10 @@ MonoBehaviour:
   slideSpeed: 20
   slideTime: 0.4
   slideCooldown: 1
+  ledgeDetected: 0
+  offset1: {x: -0.458, y: -1.19}
+  offset2: {x: 0.57, y: 1.33}
+  knockbackDirection: {x: -10, y: 2}
   whatisground:
     serializedVersion: 2
     m_Bits: 64
@@ -1497,7 +1505,7 @@ MonoBehaviour:
   checkWall: {fileID: 945786883}
   checkDisctance: 0.45
   ceilingcheckDisctance: 1.1
-  wallCheckSize: {x: 0.5, y: 2}
+  wallCheckSize: {x: 0.5, y: 2.39}
 --- !u!95 &96203272
 Animator:
   serializedVersion: 5
@@ -12764,7 +12772,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 945786882}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.7, y: -0.3, z: 0}
+  m_LocalPosition: {x: 0.7, y: -0.104, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 96203270}
@@ -14798,6 +14806,102 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1170592790
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1170592791}
+  - component: {fileID: 1170592792}
+  - component: {fileID: 1170592793}
+  - component: {fileID: 1170592794}
+  m_Layer: 0
+  m_Name: LedgeDetected
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1170592791
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170592790}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.703, y: 1.096, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 96203270}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1170592792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170592790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20168a8d1a6bf0d418884b553b366edb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 0.2
+  whatisground:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!61 &1170592793
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170592790}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.14839005, y: 0.09619069}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.9640045, y: 0.22173071}
+  m_EdgeRadius: 0
+--- !u!50 &1170592794
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170592790}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 0
 --- !u!1 &1185184190
 GameObject:
   m_ObjectHideFlags: 0

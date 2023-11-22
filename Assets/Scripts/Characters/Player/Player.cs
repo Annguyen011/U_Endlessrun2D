@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +6,18 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public class Player : MonoBehaviour
 {
+    [Header("# Player info")]
+    private bool isDead = false;
+
+    [Header("# Speed info")]
+    [SerializeField] private float maxSpeed;
+    [SerializeField] private float speedMuitiple;
+    [Space]
+    [SerializeField] private float milestoneIncreaser;
+    private float speedMileStone;
+    private float defaultSpeed;
+    private float defaultMilestoneIncreaser;
+
     [Header("# Move info")]
     public bool playerUnlock;
     public bool PlayerMoving => rb.velocity.x > 0;
@@ -15,7 +27,7 @@ public class Player : MonoBehaviour
     private bool canDoubleJump;
     private float inputX;
 
-    [Header("Slide info")]
+    [Header("# Slide info")]
     [SerializeField] private float slideSpeed;
     [SerializeField] private float slideTime;
     [SerializeField] private float slideCooldown;
@@ -23,6 +35,19 @@ public class Player : MonoBehaviour
     private float slideTimeCounter;
     private bool isSliding;
 
+    [Header("# Ledge info")]
+    public bool ledgeDetected;
+    [SerializeField] private Vector2 offset1;
+    [SerializeField] private Vector2 offset2;
+    private Vector2 climbBegunPosition;
+    private Vector2 climbOverPosition;
+    private bool canGrabLedge = true;
+    private bool canClimb;
+
+    [Header("# Knockback info")]
+    [SerializeField] private Vector2 knockbackDirection;
+    private bool isKnocked;
+    private bool canBeKnockback = true;
 
     [Header("# Collider info")]
     [SerializeField] private LayerMask whatisground;
@@ -40,44 +65,51 @@ public class Player : MonoBehaviour
     #region Components
     private Rigidbody2D rb;
     private Animator animator;
+    private SpriteRenderer sprite;
     #endregion
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        sprite = GetComponent<SpriteRenderer>();
     }
 
     private void Start()
     {
         rb.freezeRotation = true;
         rb.gravityScale = 3f;
+
+        defaultMilestoneIncreaser = milestoneIncreaser;
+        defaultSpeed = moveSpeed;
     }
 
     private void Update()
     {
-        slideTimeCounter -= Time.deltaTime;
-        slideCooldownCounter -= Time.deltaTime;
+        TimeCounter();
 
         AnimatorController();
         CheckCollider();
+
+        if (isDead) return;
+        if (isKnocked) return;
 
         if (playerUnlock && !wallDetected)
         {
             Movement();
         }
 
+        SpeedController();
+
         CheckInput();
         CheckForSlide();
+        CheckForLedge();
     }
 
-    private void CheckForSlide()
+    private void TimeCounter()
     {
-        if (slideTimeCounter < 0 && !ceilingDetected)
-        {
-            isSliding = false;
-        }
-
+        slideTimeCounter -= Time.deltaTime;
+        slideCooldownCounter -= Time.deltaTime;
     }
 
     private void AnimatorController()
@@ -86,8 +118,15 @@ public class Player : MonoBehaviour
         animator.SetFloat("xVelocity", Mathf.Abs(rb.velocity.x));
 
         animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("canClimb", canClimb);
         animator.SetBool("isSliding", isSliding);
+        animator.SetBool("isKnocked", isKnocked);
         animator.SetBool("isDoubleJump", canDoubleJump);
+
+        if (rb.velocity.y < -20)
+        {
+            animator.SetBool("canRoll", true);
+        }
     }
 
     private void CheckCollider()
@@ -120,6 +159,145 @@ public class Player : MonoBehaviour
         {
             JumpButton();
         }
+
+        // Test
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Knockback();
+        }
+    }
+
+    #region Die
+
+    private IEnumerator Dead()
+    {
+        isDead = true;
+        canBeKnockback = false;
+        rb.velocity = knockbackDirection;
+        animator.SetBool("isDead", true);
+
+        yield return new WaitForSeconds(.1f);
+
+        rb.velocity = Vector2.zero;
+    }
+
+    #endregion
+
+    #region Knockback
+
+    private IEnumerator Invicibility()
+    {
+        Color origin = sprite.color;
+        Color derkenColor = new Color(sprite.color.r, sprite.color.b, sprite.color.g, .5f);
+
+        canBeKnockback = false;
+
+        for (int i = 0; i < 3; i++)
+        {
+            sprite.color = derkenColor;
+
+            yield return new WaitForSeconds(.1f);
+
+            sprite.color = origin;
+        }
+
+        canBeKnockback = true;
+    }
+
+
+    private void Knockback()
+    {
+        if (!canBeKnockback) return;
+
+        StartCoroutine(Invicibility());
+        isKnocked = true;
+        rb.velocity = knockbackDirection;
+    }
+
+    public void KnockbackAnimationEvent() => isKnocked = false;
+
+    #endregion
+
+    #region Roll ability
+    public void RollAnimationEvent() => animator.SetBool("canRoll", false);
+    #endregion
+
+    #region Speed Controller
+
+    private void SpeedReset()
+    {
+        moveSpeed = defaultSpeed;
+        milestoneIncreaser = defaultMilestoneIncreaser;
+    }
+
+    private void SpeedController()
+    {
+        if (moveSpeed == maxSpeed) return;
+
+        if (transform.position.x > speedMileStone)
+        {
+            speedMileStone += milestoneIncreaser;
+
+            moveSpeed *= speedMuitiple;
+            milestoneIncreaser *= speedMuitiple;
+
+            if (moveSpeed > maxSpeed)
+            {
+                moveSpeed = maxSpeed;
+            }
+        }
+    }
+
+    #endregion
+
+    #region LedgeClimb ability
+
+    private void CheckForLedge()
+    {
+        if (ledgeDetected && canGrabLedge)
+        {
+            canGrabLedge = false;
+
+            Vector2 ledgePos = GetComponentInChildren<LedgeDetection>().transform.position;
+
+            rb.gravityScale = 0f;
+
+            climbBegunPosition = ledgePos + offset1;
+            climbOverPosition = ledgePos + offset2;
+
+            canClimb = true;
+        }
+
+        if (canClimb)
+        {
+            transform.position = climbBegunPosition;
+        }
+    }
+
+    public void LedgeClimbOver()
+    {
+        canClimb = false;
+        transform.position = climbOverPosition;
+
+        rb.gravityScale = 5f;
+
+        Invoke(nameof(AllowLedgeGrab), .1f);
+    }
+
+    private void AllowLedgeGrab()
+    {
+        canGrabLedge = true;
+    }
+    #endregion
+
+    #region Slide ability
+    private void CheckForSlide()
+    {
+        if (slideTimeCounter < 0 && !ceilingDetected)
+        {
+            isSliding = false;
+        }
+
     }
 
     private void SlideButton()
@@ -131,10 +309,16 @@ public class Player : MonoBehaviour
             slideCooldownCounter = slideCooldown;
         }
     }
+    #endregion
 
+    #region Movement
     private void Movement()
     {
-        if (wallDetected) return;
+        if (wallDetected)
+        {
+            SpeedReset();
+            return;
+        }
 
         if (isSliding)
         {
@@ -143,7 +327,9 @@ public class Player : MonoBehaviour
         else
             rb.velocity = new Vector2(inputX * moveSpeed, rb.velocity.y);
     }
+    #endregion
 
+    #region Jump ability
     private void JumpButton()
     {
         if (isSliding) return;
@@ -158,7 +344,7 @@ public class Player : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, doubleJumpForce);
         }
     }
-
+    #endregion
     private void OnDrawGizmos()
     {
 
