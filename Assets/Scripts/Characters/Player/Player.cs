@@ -167,9 +167,21 @@ public class Player : MonoBehaviour
         }
     }
 
-    #region Die
+    #region Player state
 
-    private IEnumerator Dead()
+    public void Damage()
+    {
+        if(moveSpeed >= maxSpeed)
+        {
+            Knockback();
+        }
+        else
+        {
+            StartCoroutine(Die());
+        }
+    }
+
+    private IEnumerator Die()
     {
         isDead = true;
         canBeKnockback = false;
@@ -179,6 +191,10 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(.1f);
 
         rb.velocity = Vector2.zero;
+
+        yield return new WaitForSeconds(2f);
+
+        GameManager.instance.ResetLevel();
     }
 
     #endregion

@@ -1,0 +1,22 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Coin : MonoBehaviour
+{
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            GameManager.instance.coins++;
+
+            DespawnCoins();
+        }
+    }
+
+    private void DespawnCoins()
+    {
+        gameObject.SetActive(false);
+    }
+}

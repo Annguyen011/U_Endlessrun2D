@@ -11,11 +11,13 @@ public class LedgeDetection : MonoBehaviour
 
     #region Components
     private Player player;
+    //private BoxCollider2D boxCollider;
     #endregion
 
     private void Awake()
     {
         player = GetComponentInParent<Player>();
+        //boxCollider = GetComponent<BoxCollider2D>();
     }
 
     private void Update()
@@ -36,6 +38,13 @@ public class LedgeDetection : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        //Collider2D[] colliders = Physics2D.OverlapBoxAll(boxCollider.bounds.center, boxCollider.size, 0);
+        
+        //foreach (Collider2D collider in colliders)
+        //{
+
+        //}
+
         if (collision.gameObject.layer.Equals(LayerMask.NameToLayer("Ground")))
         {
             canDetected = true;
