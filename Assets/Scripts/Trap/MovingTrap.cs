@@ -11,8 +11,10 @@ public class MovingTrap : Trap
     private int indexPoint = 0;
     private bool changeDirection;
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
+
         indexPoint = 0;
         transform.position = movePoints[indexPoint].position;
     }
@@ -23,7 +25,7 @@ public class MovingTrap : Trap
 
         if (Vector2.Distance(transform.position, movePoints[indexPoint].position) < .25f)
         {
-            if (indexPoint == movePoints.Count) changeDirection = true;
+            if (indexPoint >= movePoints.Count - 1) changeDirection = true;
             else if (indexPoint == 0) changeDirection = false;
 
             indexPoint += (changeDirection) ? -1 : 1;

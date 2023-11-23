@@ -46,6 +46,11 @@ public class PoolingOjbect : Singleton<PoolingOjbect>
 }
 public enum ObjectPoolType
 {
-    Platform,
+    Platform1,
+    Platform2,
+    Platform3,
+    Platform4,
+    Platform5,
+    Platform6,
     Coin
 }

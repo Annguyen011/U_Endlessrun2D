@@ -6,6 +6,17 @@ public class Trap : MonoBehaviour
 {
     [SerializeField] protected float damage = 10f;
 
+    [SerializeField] protected float chanceToSpawn = 60;
+
+    protected virtual void Start()
+    {
+        bool canSpawn = chanceToSpawn > UnityEngine.Random.Range(0, 100);
+
+        if (!canSpawn)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {

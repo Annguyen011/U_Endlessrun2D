@@ -94,7 +94,7 @@ public class Player : MonoBehaviour
         if (isDead) return;
         if (isKnocked) return;
 
-        if (playerUnlock && !wallDetected)
+        if (playerUnlock)
         {
             Movement();
         }
@@ -333,7 +333,6 @@ public class Player : MonoBehaviour
         if (wallDetected)
         {
             SpeedReset();
-            return;
         }
 
         if (isSliding)
