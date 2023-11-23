@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
 {
     [Header("# Player info")]
     private bool isDead = false;
+    public bool extraLife;
 
     [Header("# Speed info")]
     [SerializeField] private float maxSpeed;
@@ -68,6 +69,7 @@ public class Player : MonoBehaviour
     private SpriteRenderer sprite;
     #endregion
 
+    #region Unity methods
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -86,6 +88,8 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        extraLife = moveSpeed >= maxSpeed;
+
         TimeCounter();
 
         AnimatorController();
@@ -106,6 +110,7 @@ public class Player : MonoBehaviour
         CheckForLedge();
     }
 
+    #endregion
     private void TimeCounter()
     {
         slideTimeCounter -= Time.deltaTime;
@@ -171,7 +176,7 @@ public class Player : MonoBehaviour
 
     public void Damage()
     {
-        if(moveSpeed >= maxSpeed)
+        if(extraLife)
         {
             Knockback();
         }

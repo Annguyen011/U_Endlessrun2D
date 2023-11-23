@@ -11,7 +11,7 @@ public class Despawn : MonoBehaviour
     {
         if (player == null)
         {
-            player = GameObject.FindGameObjectWithTag("Player").transform;
+            player = GameManager.instance.player.transform;
         }
     }
 
